@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.anticaptrad.org/v1/youtube-lifecycle-event.schema.json",
+  "title": "Anticaptrad YouTube Lifecycle Event",
+  "description": "Redacted lifecycle event published on act.youtube.<action>.<phase>.",
+  "type": "object",
+  "required": ["requestId", "action", "phase"],
+  "properties": {
+    "requestId": {"type": "string", "minLength": 1},
+    "action": {
+      "type": "string",
+      "enum": [
+        "channel",
+        "videos",
+        "analytics",
+        "exportAnalytics",
+        "jobs",
+        "startUpload",
+        "processUpload",
+        "processAllUploads",
+        "publishVideo",
+        "updateVideo",
+        "createPlaylist",
+        "addToPlaylist",
+        "ingestGmail",
+        "sendDigest",
+        "partnerStatus",
+        "partnerOwners",
+        "partnerClaims",
+        "adminStatus",
+        "workspaceUsers"
+      ]
+    },
+    "phase": {
+      "type": "string",
+      "enum": ["requested", "succeeded", "failed"]
+    },
+    "mutating": {"type": "boolean"},
+    "durationMs": {"type": "integer", "minimum": 0},
+    "errorCode": {"type": "string", "minLength": 1},
+    "fields": {
+      "type": "object",
+      "description": "Allowlisted, redacted field summary; never raw payloads or credentials."
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"phase": {"const": "requested"}}, "required": ["phase"]},
+      "then": {"required": ["mutating", "fields"]}
+    },
+    {
+      "if": {"properties": {"phase": {"enum": ["succeeded", "failed"]}}, "required": ["phase"]},
+      "then": {"required": ["durationMs"]}
+    },
+    {
+      "if": {"properties": {"phase": {"const": "failed"}}, "required": ["phase"]},
+      "then": {"required": ["errorCode"]}
+    }
+  ],
+  "additionalProperties": false
+}

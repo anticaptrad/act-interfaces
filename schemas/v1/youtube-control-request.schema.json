@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.anticaptrad.org/v1/youtube-control-request.schema.json",
+  "title": "Anticaptrad YouTube Control Request",
+  "description": "Transport-neutral command mapped by act-api-server.rs to an action path, JSON payload, and Idempotency-Key header.",
+  "type": "object",
+  "required": ["action", "payload"],
+  "properties": {
+    "action": {
+      "type": "string",
+      "enum": [
+        "channel",
+        "videos",
+        "analytics",
+        "exportAnalytics",
+        "jobs",
+        "startUpload",
+        "processUpload",
+        "processAllUploads",
+        "publishVideo",
+        "updateVideo",
+        "createPlaylist",
+        "addToPlaylist",
+        "ingestGmail",
+        "sendDigest",
+        "partnerStatus",
+        "partnerOwners",
+        "partnerClaims",
+        "adminStatus",
+        "workspaceUsers"
+      ]
+    },
+    "payload": {
+      "type": "object"
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[!-~]+$",
+      "description": "Required for mutating actions; maps to the Idempotency-Key HTTP header."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "enum": [
+              "exportAnalytics",
+              "startUpload",
+              "processUpload",
+              "processAllUploads",
+              "publishVideo",
+              "updateVideo",
+              "createPlaylist",
+              "addToPlaylist",
+              "ingestGmail",
+              "sendDigest"
+            ]
+          }
+        },
+        "required": ["action"]
+      },
+      "then": {
+        "required": ["idempotencyKey"]
+      }
+    }
+  ],
+  "additionalProperties": false
+}

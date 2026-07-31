@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.anticaptrad.org/v1/youtube-control-response.schema.json",
+  "title": "Anticaptrad YouTube Control Response",
+  "oneOf": [
+    {
+      "title": "Success",
+      "type": "object",
+      "required": ["ok", "requestId", "durationMs", "data"],
+      "properties": {
+        "ok": {"const": true},
+        "requestId": {"type": "string", "minLength": 1},
+        "durationMs": {"type": "integer", "minimum": 0},
+        "data": {}
+      },
+      "additionalProperties": false
+    },
+    {
+      "title": "Failure",
+      "type": "object",
+      "required": ["ok", "error"],
+      "properties": {
+        "ok": {"const": false},
+        "requestId": {"type": "string", "minLength": 1},
+        "error": {
+          "type": "object",
+          "required": ["code", "message"],
+          "properties": {
+            "code": {"type": "string", "minLength": 1},
+            "message": {"type": "string", "minLength": 1},
+            "details": {
+              "description": "Redacted, bounded diagnostics only. Credentials, raw bodies, and stack traces are forbidden."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  ]
+}

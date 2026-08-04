@@ -3,3 +3,7 @@ __pycache__/
 .venv/
 dist/
 .DS_Store
+
+# zed-pkg local state
+/zed_modules/
+/.zed/pack/

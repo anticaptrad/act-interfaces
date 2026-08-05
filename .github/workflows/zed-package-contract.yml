@@ -1,0 +1,33 @@
+name: Zed package contract
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate package metadata
+        run: |
+          python3 - <<'PY'
+          import pathlib, tomllib
+          root = pathlib.Path('.')
+          manifest = tomllib.loads((root / '.zpkg.toml').read_text())
+          lock = tomllib.loads((root / '.zpkg.lock').read_text())
+          package = manifest.get('package', {})
+          assert package.get('org') == 'anticaptrad'
+          assert package.get('name') == 'act-interfaces'
+          assert package.get('repository', {}).get('url') == 'https://github.com/anticaptrad/act-interfaces'
+          assert manifest.get('dependencies', {}) in ({}, None)
+          assert manifest.get('targets', {}).get('repository', {}).get('dir') == '.'
+          assert lock.get('version') == 1
+          PY

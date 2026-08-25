@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 .venv/
 dist/
+/target/
 .DS_Store
 
 # zed-pkg local state

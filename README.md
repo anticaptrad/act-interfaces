@@ -10,6 +10,11 @@ Versioned, language-neutral contracts shared by Anticaptrad services.
 
 This repository is the canonical place for stable request, response, and event schemas at the Rust control-plane boundary. Runtime implementations live in repositories such as `act-api-server.rs`; generated clients belong in `act-clients`.
 
+The `act-interfaces` Rust crate exposes Serde data shapes generated to match
+those schemas. It deliberately contains no transport, authentication,
+authorization, persistence, or domain-service implementation. The JSON Schema
+files remain the language-neutral source of truth for every other target.
+
 ## Current contract set
 
 `schemas/v1/` describes:
@@ -31,6 +36,10 @@ Secrets, OAuth tokens, API keys, deployment IDs used as credentials, and raw ups
 
 ```bash
 python3 tests/validate_schemas.py
+cargo fmt --all -- --check
+cargo clippy --all-targets --locked -- -D warnings
+cargo test --all-targets --locked
+zed validate
 ```
 
 The validator uses only the Python standard library. CI checks JSON syntax, stable schema identifiers, exact action coverage, mutating-action idempotency requirements, response-envelope exclusivity, and event-topic compatibility.

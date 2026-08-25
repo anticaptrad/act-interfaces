@@ -43,6 +43,17 @@ EXPECTED_MUTATIONS = [
     "ingestGmail",
     "sendDigest",
 ]
+IGNORED_SCAN_DIRECTORIES = {
+    ".dart_tool",
+    ".git",
+    ".gradle",
+    ".venv",
+    "build",
+    "dist",
+    "node_modules",
+    "target",
+    "zed_modules",
+}
 
 errors: list[str] = []
 
@@ -97,7 +108,7 @@ secret_patterns = [
     re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
 ]
 for path in ROOT.rglob("*"):
-    if not path.is_file() or ".git" in path.parts:
+    if not path.is_file() or any(part in IGNORED_SCAN_DIRECTORIES for part in path.parts):
         continue
     text = path.read_text(encoding="utf-8", errors="ignore")
     for pattern in secret_patterns:

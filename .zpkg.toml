@@ -5,6 +5,7 @@ version = "0.1.0"
 description = "Versioned language-neutral contracts for Anticapitalist Tradition services"
 license = "MIT"
 keywords = ["interfaces", "json-schema", "contracts", "events", "youtube"]
+language = "rust"
 
 [package.repository]
 vcs = "git"
@@ -16,9 +17,9 @@ tag_format = "v{version}"
 smoke_test = "test -d \"$ZED_PKG_TEST_TARGET/schemas/v1\" && python3 \"$ZED_PKG_TEST_TARGET/tests/validate_schemas.py\""
 exclude = [".env", ".env.*", ".direnv/**", ".zed/**", ".zed-pack/**", "tmp/**", "**/*.log", ".DS_Store", "**/__pycache__/**"]
 
-[targets.repository]
+[targets.rust]
 dir = "."
-name = "act-interfaces-repository"
+adapter = "rust"
 
 [scripts]
 test = "python3 tests/validate_schemas.py"

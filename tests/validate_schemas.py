@@ -47,6 +47,7 @@ IGNORED_SCAN_DIRECTORIES = {
     ".dart_tool",
     ".git",
     ".gradle",
+    ".ores",
     ".venv",
     "build",
     "dist",
@@ -78,6 +79,8 @@ def load(name: str) -> dict:
 request = load("youtube-control-request.schema.json")
 response = load("youtube-control-response.schema.json")
 event = load("youtube-lifecycle-event.schema.json")
+creator_project = load("creator-media-project.schema.json")
+render_receipt = load("creator-render-receipt.schema.json")
 
 request_actions = request.get("properties", {}).get("action", {}).get("enum", [])
 event_actions = event.get("properties", {}).get("action", {}).get("enum", [])
@@ -101,6 +104,45 @@ if len(branches) == 2:
 phases = event.get("properties", {}).get("phase", {}).get("enum", [])
 check(phases == ["requested", "succeeded", "failed"], "lifecycle event phases are unstable")
 check(event.get("additionalProperties") is False, "event schema must reject unknown top-level fields")
+
+project_properties = creator_project.get("properties", {})
+publication = creator_project.get("$defs", {}).get("publication", {}).get("properties", {})
+check(project_properties.get("schemaVersion", {}).get("const") == "1.0", "creator project version is unstable")
+check(
+    project_properties.get("creatorHandle", {}).get("const") == "@anticaptrad",
+    "creator project must pin @anticaptrad",
+)
+check(publication.get("channelId", {}).get("const") == "UC-Gloecwemo_Mh-VAjnUipg", "wrong YouTube channel pin")
+check(publication.get("privacyStatus", {}).get("const") == "private", "creator project must publish privately")
+check(publication.get("allowPublic", {}).get("const") is False, "creator project cannot shortcut public publishing")
+
+project_defs = creator_project.get("$defs", {})
+licensed_rights_rule = project_defs.get("rights", {}).get("allOf", [{}])[0]
+licensed_required = licensed_rights_rule.get("then", {}).get("required", [])
+check(
+    licensed_required == ["sourceUrl", "licenseId", "licenseName", "attribution"],
+    "licensed stock and cues must carry complete provenance",
+)
+clip_rule = project_defs.get("output", {}).get("allOf", [{}])[0]
+clip_duration = clip_rule.get("then", {}).get("properties", {}).get("durationMs", {})
+check(
+    clip_duration.get("minimum") == 30000 and clip_duration.get("maximum") == 50000,
+    "creator clips must remain between 30 and 50 seconds",
+)
+
+receipt_defs = render_receipt.get("$defs", {})
+receipt_publication = receipt_defs.get("publicationReceipt", {}).get("properties", {})
+check(receipt_publication.get("publicEligible", {}).get("const") is False, "render receipts cannot approve public release")
+check(receipt_publication.get("privacyStatus", {}).get("const") == "private", "render receipts must remain private-first")
+failure_codes = receipt_defs.get("failure", {}).get("properties", {}).get("code", {}).get("enum", [])
+check("RIGHTS_NOT_APPROVED" in failure_codes, "render failure contract must expose a rights gate")
+check("ASSET_DIGEST_MISMATCH" in failure_codes, "render failure contract must expose digest mismatch")
+
+for schema_name, schema in (("creator project", creator_project), ("render receipt", render_receipt)):
+    relative_path_pattern = schema.get("$defs", {}).get("relativePath", {}).get("pattern", "")
+    check("(?!/)" in relative_path_pattern, f"{schema_name} paths must reject absolute paths")
+    check("\\.\\." in relative_path_pattern, f"{schema_name} paths must reject traversal")
+    check(schema.get("additionalProperties") is False, f"{schema_name} must reject unknown top-level fields")
 
 secret_patterns = [
     re.compile(r"ghp_[A-Za-z0-9]{20,}"),
@@ -128,4 +170,5 @@ print("VALIDATION PASSED")
 print(f"- {len(EXPECTED_ACTIONS)} actions")
 print(f"- {len(EXPECTED_MUTATIONS)} mutating actions require idempotency")
 print("- success/error envelopes and lifecycle phases verified")
+print("- creator project, rights, clip, receipt, and private-publication gates verified")
 print("- no obvious secrets or conflict markers found")

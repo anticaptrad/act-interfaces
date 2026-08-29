@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "1.0",
+  "projectId": "den-262-concept-001",
+  "creatorHandle": "@anticaptrad",
+  "title": "Markets and what prices do not measure",
+  "assets": [
+    {
+      "assetId": "camera-a",
+      "kind": "camera",
+      "relativePath": "assets/camera-a.mp4",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "mediaType": "video/mp4",
+      "durationMs": 180000,
+      "rights": {
+        "sourceType": "originalCamera",
+        "owner": "AntiCap Trad",
+        "approved": true
+      }
+    },
+    {
+      "assetId": "cue-bell",
+      "kind": "soundCue",
+      "relativePath": "assets/cue-bell.wav",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "mediaType": "audio/wav",
+      "durationMs": 900,
+      "rights": {
+        "sourceType": "soundCue",
+        "owner": "Approved sound library",
+        "approved": true,
+        "sourceUrl": "https://assets.example.invalid/cue-bell",
+        "licenseId": "example-license-001",
+        "licenseName": "Example fixture license",
+        "attribution": "Synthetic contract fixture; replace before production rendering."
+      }
+    }
+  ],
+  "timeline": [
+    {
+      "segmentId": "opening-title",
+      "kind": "titleCard",
+      "startMs": 0,
+      "durationMs": 5000,
+      "text": {
+        "heading": "What can a price fail to measure?",
+        "subheading": "A reviewed AntiCapTrad concept",
+        "position": "center",
+        "accentColor": "#66D9FF"
+      },
+      "motion": "zoomIn",
+      "crop": "fit",
+      "audioGainDb": 0,
+      "transition": {"kind": "fade", "durationMs": 600}
+    },
+    {
+      "segmentId": "camera-opening",
+      "kind": "source",
+      "startMs": 5000,
+      "durationMs": 50000,
+      "assetId": "camera-a",
+      "sourceInMs": 0,
+      "motion": "static",
+      "crop": "fill",
+      "audioGainDb": 0,
+      "transition": {"kind": "cut", "durationMs": 0}
+    },
+    {
+      "segmentId": "evidence-interstitial",
+      "kind": "interstitial",
+      "startMs": 55000,
+      "durationMs": 5000,
+      "text": {
+        "heading": "Show the mechanism and the evidence",
+        "position": "center",
+        "accentColor": "#ADFF2F"
+      },
+      "motion": "panLeft",
+      "crop": "fit",
+      "audioGainDb": 0,
+      "transition": {"kind": "dissolve", "durationMs": 500}
+    },
+    {
+      "segmentId": "camera-close",
+      "kind": "source",
+      "startMs": 60000,
+      "durationMs": 120000,
+      "assetId": "camera-a",
+      "sourceInMs": 50000,
+      "motion": "zoomIn",
+      "crop": "faceAware",
+      "audioGainDb": -1.5,
+      "transition": {"kind": "dissolve", "durationMs": 500}
+    }
+  ],
+  "captions": [
+    {
+      "startMs": 5000,
+      "endMs": 9000,
+      "text": "Prices coordinate exchange, but they do not measure every human value.",
+      "speaker": "Host"
+    }
+  ],
+  "audio": {
+    "targetLufs": -16,
+    "truePeakDb": -1.5,
+    "cues": [
+      {"assetId": "cue-bell", "startMs": 55000, "gainDb": -14}
+    ]
+  },
+  "outputs": [
+    {
+      "outputId": "master-landscape",
+      "kind": "master",
+      "relativePath": "outputs/master-landscape.mp4",
+      "aspectRatio": "16:9",
+      "width": 1280,
+      "height": 720,
+      "durationMs": 180000,
+      "safeAreaPercent": 8,
+      "privacyStatus": "private"
+    },
+    {
+      "outputId": "clip-vertical-01",
+      "kind": "clip",
+      "relativePath": "outputs/clip-vertical-01.mp4",
+      "aspectRatio": "9:16",
+      "width": 1080,
+      "height": 1920,
+      "durationMs": 40000,
+      "safeAreaPercent": 12,
+      "privacyStatus": "private",
+      "sourceWindow": {"startMs": 20000, "endMs": 60000}
+    }
+  ],
+  "publication": {
+    "provider": "youtube",
+    "channelHandle": "@anticaptrad",
+    "channelId": "UC-Gloecwemo_Mh-VAjnUipg",
+    "privacyStatus": "private",
+    "rightsConfirmed": true,
+    "allowPublic": false
+  },
+  "review": {
+    "state": "approved",
+    "reviewedBy": "AntiCapTrad operator",
+    "reviewedAt": "2026-08-29T00:00:00Z",
+    "notes": "Contract fixture only; production assets require their own review."
+  }
+}

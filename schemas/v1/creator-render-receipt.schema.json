@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.anticaptrad.org/v1/creator-render-receipt.schema.json",
+  "title": "AntiCapTrad Creator Render Receipt",
+  "description": "A bounded, credential-free receipt for a deterministic native render attempt.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "renderId",
+    "projectId",
+    "status",
+    "source",
+    "outputs",
+    "toolchain",
+    "reviewState",
+    "publication",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": {"const": "1.0"},
+    "renderId": {"$ref": "#/$defs/identifier"},
+    "projectId": {"$ref": "#/$defs/identifier"},
+    "status": {"type": "string", "enum": ["succeeded", "failed"]},
+    "source": {"$ref": "#/$defs/sourceLineage"},
+    "outputs": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {"$ref": "#/$defs/outputReceipt"}
+    },
+    "toolchain": {"$ref": "#/$defs/toolchain"},
+    "reviewState": {"type": "string", "enum": ["needsReview", "approved", "rejected"]},
+    "publication": {"$ref": "#/$defs/publicationReceipt"},
+    "failure": {"$ref": "#/$defs/failure"},
+    "createdAt": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "succeeded"}}, "required": ["status"]},
+      "then": {
+        "properties": {"outputs": {"minItems": 1}},
+        "not": {"required": ["failure"]}
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "failed"}}, "required": ["status"]},
+      "then": {
+        "required": ["failure"],
+        "properties": {"outputs": {"maxItems": 0}}
+      }
+    },
+    {
+      "if": {"properties": {"reviewState": {"const": "approved"}}, "required": ["reviewState"]},
+      "then": {
+        "properties": {
+          "publication": {
+            "properties": {"privateUploadEligible": {"const": true}}
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sourceAsset": {
+      "type": "object",
+      "required": ["assetId", "sha256"],
+      "properties": {
+        "assetId": {"$ref": "#/$defs/identifier"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "sourceLineage": {
+      "type": "object",
+      "required": ["projectSha256", "assets"],
+      "properties": {
+        "projectSha256": {"$ref": "#/$defs/sha256"},
+        "assets": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {"$ref": "#/$defs/sourceAsset"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "sourceWindow": {
+      "type": "object",
+      "required": ["startMs", "endMs"],
+      "properties": {
+        "startMs": {"type": "integer", "minimum": 0, "maximum": 14400000},
+        "endMs": {"type": "integer", "minimum": 1, "maximum": 14400000}
+      },
+      "additionalProperties": false
+    },
+    "outputReceipt": {
+      "type": "object",
+      "required": [
+        "outputId",
+        "kind",
+        "relativePath",
+        "sha256",
+        "sizeBytes",
+        "durationMs",
+        "width",
+        "height",
+        "videoCodec",
+        "audioCodec"
+      ],
+      "properties": {
+        "outputId": {"$ref": "#/$defs/identifier"},
+        "kind": {"type": "string", "enum": ["master", "clip", "variation"]},
+        "relativePath": {"$ref": "#/$defs/relativePath"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "sizeBytes": {"type": "integer", "minimum": 1, "maximum": 107374182400},
+        "durationMs": {"type": "integer", "minimum": 1, "maximum": 14400000},
+        "width": {"type": "integer", "minimum": 320, "maximum": 7680},
+        "height": {"type": "integer", "minimum": 320, "maximum": 4320},
+        "videoCodec": {"type": "string", "enum": ["h264", "hevc", "av1", "vp9"]},
+        "audioCodec": {"type": "string", "enum": ["aac", "opus", "flac"]},
+        "sourceWindow": {"$ref": "#/$defs/sourceWindow"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "clip"}}, "required": ["kind"]},
+          "then": {
+            "required": ["sourceWindow"],
+            "properties": {"durationMs": {"minimum": 30000, "maximum": 50000}}
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "toolchain": {
+      "type": "object",
+      "required": ["renderer", "rendererVersion", "ffmpegVersion"],
+      "properties": {
+        "renderer": {"const": "act-desktop-app.rs"},
+        "rendererVersion": {"type": "string", "minLength": 1, "maxLength": 100},
+        "ffmpegVersion": {"type": "string", "minLength": 1, "maxLength": 200}
+      },
+      "additionalProperties": false
+    },
+    "publicationReceipt": {
+      "type": "object",
+      "required": ["provider", "channelHandle", "channelId", "privacyStatus", "privateUploadEligible", "publicEligible"],
+      "properties": {
+        "provider": {"const": "youtube"},
+        "channelHandle": {"const": "@anticaptrad"},
+        "channelId": {"const": "UC-Gloecwemo_Mh-VAjnUipg"},
+        "privacyStatus": {"const": "private"},
+        "privateUploadEligible": {"type": "boolean"},
+        "publicEligible": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "failure": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "INVALID_PROJECT",
+            "ASSET_NOT_FOUND",
+            "ASSET_DIGEST_MISMATCH",
+            "RIGHTS_NOT_APPROVED",
+            "UNSUPPORTED_EFFECT",
+            "INVALID_OUTPUT",
+            "RENDERER_UNAVAILABLE",
+            "RENDER_FAILED",
+            "PROBE_FAILED"
+          ]
+        },
+        "message": {"type": "string", "minLength": 1, "maxLength": 500}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.anticaptrad.org/v1/creator-media-project.schema.json",
+  "title": "AntiCapTrad Creator Media Project",
+  "description": "A reviewed, transport-neutral edit plan for deterministic native rendering. It contains control-plane metadata only, never media bytes or provider credentials.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "projectId",
+    "creatorHandle",
+    "title",
+    "assets",
+    "timeline",
+    "audio",
+    "outputs",
+    "publication",
+    "review"
+  ],
+  "properties": {
+    "schemaVersion": {"const": "1.0"},
+    "projectId": {"$ref": "#/$defs/identifier"},
+    "creatorHandle": {"const": "@anticaptrad"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 160},
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {"$ref": "#/$defs/asset"}
+    },
+    "timeline": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {"$ref": "#/$defs/timelineSegment"}
+    },
+    "captions": {
+      "type": "array",
+      "maxItems": 5000,
+      "items": {"$ref": "#/$defs/caption"}
+    },
+    "audio": {"$ref": "#/$defs/audioPlan"},
+    "outputs": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 20,
+      "items": {"$ref": "#/$defs/output"}
+    },
+    "publication": {"$ref": "#/$defs/publication"},
+    "review": {"$ref": "#/$defs/review"}
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$",
+      "description": "A forward-slash relative path confined by the native renderer to its approved project directory."
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "rights": {
+      "type": "object",
+      "required": ["sourceType", "owner", "approved"],
+      "properties": {
+        "sourceType": {
+          "type": "string",
+          "enum": ["originalCamera", "licensedStock", "generated", "soundCue"]
+        },
+        "owner": {"type": "string", "minLength": 1, "maxLength": 200},
+        "approved": {"type": "boolean"},
+        "sourceUrl": {"type": "string", "format": "uri", "maxLength": 1000},
+        "licenseId": {"type": "string", "minLength": 1, "maxLength": 200},
+        "licenseName": {"type": "string", "minLength": 1, "maxLength": 200},
+        "attribution": {"type": "string", "minLength": 1, "maxLength": 1000}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "sourceType": {"enum": ["licensedStock", "soundCue"]}
+            },
+            "required": ["sourceType"]
+          },
+          "then": {
+            "required": ["sourceUrl", "licenseId", "licenseName", "attribution"]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "asset": {
+      "type": "object",
+      "required": ["assetId", "kind", "relativePath", "sha256", "mediaType", "rights"],
+      "properties": {
+        "assetId": {"$ref": "#/$defs/identifier"},
+        "kind": {
+          "type": "string",
+          "enum": ["camera", "stockVideo", "stockImage", "soundCue", "music", "voiceover"]
+        },
+        "relativePath": {"$ref": "#/$defs/relativePath"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "mediaType": {
+          "type": "string",
+          "enum": [
+            "video/mp4",
+            "video/quicktime",
+            "video/webm",
+            "image/png",
+            "image/jpeg",
+            "audio/wav",
+            "audio/mpeg",
+            "audio/flac"
+          ]
+        },
+        "durationMs": {"type": "integer", "minimum": 1, "maximum": 14400000},
+        "rights": {"$ref": "#/$defs/rights"}
+      },
+      "additionalProperties": false
+    },
+    "textOverlay": {
+      "type": "object",
+      "required": ["heading", "position", "accentColor"],
+      "properties": {
+        "heading": {"type": "string", "minLength": 1, "maxLength": 140},
+        "subheading": {"type": "string", "maxLength": 280},
+        "position": {"type": "string", "enum": ["center", "lowerThird", "upperThird"]},
+        "accentColor": {"type": "string", "pattern": "^#[A-Fa-f0-9]{6}$"}
+      },
+      "additionalProperties": false
+    },
+    "transition": {
+      "type": "object",
+      "required": ["kind", "durationMs"],
+      "properties": {
+        "kind": {"type": "string", "enum": ["cut", "fade", "dissolve"]},
+        "durationMs": {"type": "integer", "minimum": 0, "maximum": 2000}
+      },
+      "additionalProperties": false
+    },
+    "timelineSegment": {
+      "type": "object",
+      "required": ["segmentId", "kind", "startMs", "durationMs", "motion", "crop", "audioGainDb", "transition"],
+      "properties": {
+        "segmentId": {"$ref": "#/$defs/identifier"},
+        "kind": {"type": "string", "enum": ["source", "titleCard", "interstitial"]},
+        "startMs": {"type": "integer", "minimum": 0, "maximum": 14400000},
+        "durationMs": {"type": "integer", "minimum": 250, "maximum": 14400000},
+        "assetId": {"$ref": "#/$defs/identifier"},
+        "sourceInMs": {"type": "integer", "minimum": 0, "maximum": 14400000},
+        "text": {"$ref": "#/$defs/textOverlay"},
+        "motion": {
+          "type": "string",
+          "enum": ["static", "panLeft", "panRight", "tiltUp", "tiltDown", "zoomIn", "zoomOut"]
+        },
+        "crop": {"type": "string", "enum": ["fit", "fill", "faceAware"]},
+        "audioGainDb": {"type": "number", "minimum": -30, "maximum": 12},
+        "transition": {"$ref": "#/$defs/transition"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "source"}}, "required": ["kind"]},
+          "then": {"required": ["assetId", "sourceInMs"]}
+        },
+        {
+          "if": {
+            "properties": {"kind": {"enum": ["titleCard", "interstitial"]}},
+            "required": ["kind"]
+          },
+          "then": {"required": ["text"]}
+        }
+      ],
+      "additionalProperties": false
+    },
+    "caption": {
+      "type": "object",
+      "required": ["startMs", "endMs", "text"],
+      "properties": {
+        "startMs": {"type": "integer", "minimum": 0, "maximum": 14400000},
+        "endMs": {"type": "integer", "minimum": 1, "maximum": 14400000},
+        "text": {"type": "string", "minLength": 1, "maxLength": 500},
+        "speaker": {"type": "string", "maxLength": 120}
+      },
+      "additionalProperties": false
+    },
+    "cuePlacement": {
+      "type": "object",
+      "required": ["assetId", "startMs", "gainDb"],
+      "properties": {
+        "assetId": {"$ref": "#/$defs/identifier"},
+        "startMs": {"type": "integer", "minimum": 0, "maximum": 14400000},
+        "gainDb": {"type": "number", "minimum": -30, "maximum": 0}
+      },
+      "additionalProperties": false
+    },
+    "audioPlan": {
+      "type": "object",
+      "required": ["targetLufs", "truePeakDb", "cues"],
+      "properties": {
+        "targetLufs": {"type": "number", "minimum": -24, "maximum": -9},
+        "truePeakDb": {"type": "number", "minimum": -6, "maximum": -1},
+        "cues": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {"$ref": "#/$defs/cuePlacement"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "sourceWindow": {
+      "type": "object",
+      "required": ["startMs", "endMs"],
+      "properties": {
+        "startMs": {"type": "integer", "minimum": 0, "maximum": 14400000},
+        "endMs": {"type": "integer", "minimum": 1, "maximum": 14400000}
+      },
+      "additionalProperties": false
+    },
+    "output": {
+      "type": "object",
+      "required": ["outputId", "kind", "relativePath", "aspectRatio", "width", "height", "durationMs", "safeAreaPercent", "privacyStatus"],
+      "properties": {
+        "outputId": {"$ref": "#/$defs/identifier"},
+        "kind": {"type": "string", "enum": ["master", "clip", "variation"]},
+        "relativePath": {"$ref": "#/$defs/relativePath"},
+        "aspectRatio": {"type": "string", "enum": ["16:9", "9:16", "1:1"]},
+        "width": {"type": "integer", "minimum": 320, "maximum": 7680},
+        "height": {"type": "integer", "minimum": 320, "maximum": 4320},
+        "durationMs": {"type": "integer", "minimum": 1000, "maximum": 14400000},
+        "safeAreaPercent": {"type": "number", "minimum": 5, "maximum": 20},
+        "privacyStatus": {"const": "private"},
+        "sourceWindow": {"$ref": "#/$defs/sourceWindow"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "clip"}}, "required": ["kind"]},
+          "then": {
+            "required": ["sourceWindow"],
+            "properties": {"durationMs": {"minimum": 30000, "maximum": 50000}}
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "publication": {
+      "type": "object",
+      "required": ["provider", "channelHandle", "channelId", "privacyStatus", "rightsConfirmed", "allowPublic"],
+      "properties": {
+        "provider": {"const": "youtube"},
+        "channelHandle": {"const": "@anticaptrad"},
+        "channelId": {"const": "UC-Gloecwemo_Mh-VAjnUipg"},
+        "privacyStatus": {"const": "private"},
+        "rightsConfirmed": {"const": true},
+        "allowPublic": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "review": {
+      "type": "object",
+      "required": ["state"],
+      "properties": {
+        "state": {"type": "string", "enum": ["draft", "needsReview", "approved", "rejected"]},
+        "reviewedBy": {"type": "string", "minLength": 1, "maxLength": 200},
+        "reviewedAt": {"type": "string", "format": "date-time"},
+        "notes": {"type": "string", "maxLength": 2000}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"state": {"enum": ["approved", "rejected"]}}, "required": ["state"]},
+          "then": {"required": ["reviewedBy", "reviewedAt"]}
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

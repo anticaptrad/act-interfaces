@@ -21,7 +21,18 @@ files remain the language-neutral source of truth for every other target.
 
 - a transport-neutral YouTube control request;
 - the success/error envelope returned by the Rust control plane;
-- redacted NATS lifecycle events on `act.youtube.<action>.<phase>`.
+- redacted NATS lifecycle events on `act.youtube.<action>.<phase>`;
+- a creator-media project with rights/provenance, bounded timeline operations,
+  captions, audio cues, landscape masters, 30–50 second derivatives, and the
+  immutable `@anticaptrad` YouTube channel boundary; and
+- a credential-free render receipt with checksums, source lineage, media probes,
+  tool versions, review state, and private-upload eligibility.
+
+The creator schemas carry control-plane values only. They deliberately exclude
+media bytes, executable FFmpeg filter strings, shell commands, provider tokens,
+and public-publication approval. Native renderers translate the reviewed typed
+operations into bounded media commands and emit a receipt for independent E2E
+inspection.
 
 The HTTP mapping implemented by `act-api-server.rs` is:
 

@@ -7,6 +7,13 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
+pub mod creator_media;
+pub use creator_media::*;
+
+pub const CREATOR_MEDIA_PROJECT_SCHEMA: &str =
+    include_str!("../schemas/v1/creator-media-project.schema.json");
+pub const CREATOR_RENDER_RECEIPT_SCHEMA: &str =
+    include_str!("../schemas/v1/creator-render-receipt.schema.json");
 pub const YOUTUBE_CONTROL_REQUEST_SCHEMA: &str =
     include_str!("../schemas/v1/youtube-control-request.schema.json");
 pub const YOUTUBE_CONTROL_RESPONSE_SCHEMA: &str =
@@ -140,6 +147,8 @@ mod tests {
 
     #[test]
     fn embedded_schemas_remain_available_to_consumers() {
+        assert!(CREATOR_MEDIA_PROJECT_SCHEMA.contains("licensedStock"));
+        assert!(CREATOR_RENDER_RECEIPT_SCHEMA.contains("publicEligible"));
         assert!(YOUTUBE_CONTROL_REQUEST_SCHEMA.contains("idempotencyKey"));
         assert!(YOUTUBE_CONTROL_RESPONSE_SCHEMA.contains("durationMs"));
         assert!(YOUTUBE_LIFECYCLE_EVENT_SCHEMA.contains("requested"));

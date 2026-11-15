@@ -24,10 +24,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Python
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30
         with:
-          python-version: '3.12'
+          toolchain: stable
+          components: rustfmt, clippy
 
-      - name: Validate versioned schemas
-        run: python3 tests/validate_schemas.py
+      - name: Validate versioned schemas and repository safety in Rust
+        run: cargo test --locked --test schema_policy
+
+      - name: Require formatted Rust tests
+        run: cargo fmt --all -- --check

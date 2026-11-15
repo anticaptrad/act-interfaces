@@ -1,0 +1,31 @@
+name: AttoLang candidate schema projection
+on:
+  pull_request:
+    paths:
+      - 'examples/v1/atto-*'
+      - 'tests/atto_projection.rs'
+      - 'schemas/v1/creator-media-project.schema.json'
+      - '.github/workflows/atto-projection.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'examples/v1/atto-*'
+      - 'tests/atto_projection.rs'
+      - 'schemas/v1/creator-media-project.schema.json'
+      - '.github/workflows/atto-projection.yml'
+permissions:
+  contents: read
+jobs:
+  contract-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30
+        with:
+          toolchain: stable
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+      - run: cargo test --locked --test atto_projection

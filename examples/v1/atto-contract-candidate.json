@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "language": "atto",
+  "source": "examples/v1/atto-clip-duration.atto",
+  "status": "candidate",
+  "compilerEvidence": "unverified",
+  "runtimeRenderer": false,
+  "contractAuthority": "schemas/v1/creator-media-project.schema.json",
+  "projection": "output.kind=clip -> output.durationMs",
+  "bounds": {
+    "minInclusive": 30000,
+    "maxInclusive": 50000
+  }
+}

@@ -1,0 +1,24 @@
+// AttoLang candidate projection of the creator-media JSON Schema clip bounds.
+// The JSON Schema remains authoritative; this is a pure policy fixture only.
+// This source is NOT a renderer, schema validator, or production SDK.
+fnc clip_duration_valid(int duration_ms): bool {
+  if duration_ms < 30000 then
+    return false;
+  fi
+  return duration_ms <= 50000;
+}
+
+pub fnc main(): int {
+  if clip_duration_valid(30000) then
+    if clip_duration_valid(50000) then
+      if clip_duration_valid(29999) then
+        return 1;
+      fi
+      if clip_duration_valid(50001) then
+        return 2;
+      fi
+      return 0;
+    fi
+  fi
+  return 3;
+}

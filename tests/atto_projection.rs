@@ -17,8 +17,14 @@ fn errors(candidate: &Value, schema: &Value, source: &str) -> Vec<&'static str> 
     check(candidate["schemaVersion"] == 1, "version mismatch");
     check(candidate["language"] == "atto", "wrong language");
     check(candidate["status"] == "candidate", "unapproved promotion");
-    check(candidate["compilerEvidence"] == "unverified", "compiler proof missing");
-    check(candidate["runtimeRenderer"] == false, "unsupported renderer claim");
+    check(
+        candidate["compilerEvidence"] == "unverified",
+        "compiler proof missing",
+    );
+    check(
+        candidate["runtimeRenderer"] == false,
+        "unsupported renderer claim",
+    );
     check(
         candidate["source"] == "examples/v1/atto-clip-duration.atto",
         "untrusted source path",
@@ -33,7 +39,10 @@ fn errors(candidate: &Value, schema: &Value, source: &str) -> Vec<&'static str> 
     );
 
     let clip_rule = &schema["$defs"]["output"]["allOf"][0];
-    check(clip_rule["if"]["properties"]["kind"]["const"] == "clip", "wrong guard kind");
+    check(
+        clip_rule["if"]["properties"]["kind"]["const"] == "clip",
+        "wrong guard kind",
+    );
     check(
         clip_rule["then"]["required"]
             .as_array()
@@ -47,8 +56,14 @@ fn errors(candidate: &Value, schema: &Value, source: &str) -> Vec<&'static str> 
 
     if let (Some(min), Some(max)) = (min, max) {
         check(min <= max && min >= 0, "invalid schema range");
-        check(candidate["bounds"]["minInclusive"] == min, "minimum mismatch");
-        check(candidate["bounds"]["maxInclusive"] == max, "maximum mismatch");
+        check(
+            candidate["bounds"]["minInclusive"] == min,
+            "minimum mismatch",
+        );
+        check(
+            candidate["bounds"]["maxInclusive"] == max,
+            "maximum mismatch",
+        );
 
         // Keep the candidate intentionally restricted to a reviewable, known
         // syntax shape. Fail closed on any source/control-flow mutation.

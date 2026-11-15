@@ -46,14 +46,14 @@ Secrets, OAuth tokens, API keys, deployment IDs used as credentials, and raw ups
 ## Validation
 
 ```bash
-python3 tests/validate_schemas.py
+cargo test --locked --test schema_policy
 cargo fmt --all -- --check
 cargo clippy --all-targets --locked -- -D warnings
 cargo test --all-targets --locked
 zed validate
 ```
 
-The validator uses only the Python standard library. CI checks JSON syntax, stable schema identifiers, exact action coverage, mutating-action idempotency requirements, response-envelope exclusivity, and event-topic compatibility.
+The CI validator is implemented in Rust using the crate's pinned serde_json dependency. The prior Python validator is retained temporarily for parity review; it is no longer invoked by the primary workflow. CI checks JSON syntax, stable schema identifiers, exact action coverage, mutating-action idempotency requirements, response-envelope exclusivity, and event-topic compatibility.
 
 ## Compatibility policy
 
